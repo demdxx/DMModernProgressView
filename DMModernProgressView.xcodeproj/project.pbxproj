@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		B33818EA183F422800CF8E8D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B33818E9183F422800CF8E8D /* Foundation.framework */; };
-		B33818EC183F422800CF8E8D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B33818EB183F422800CF8E8D /* CoreGraphics.framework */; };
 		B33818EE183F422800CF8E8D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B33818ED183F422800CF8E8D /* UIKit.framework */; };
 		B33818F4183F422800CF8E8D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B33818F2183F422800CF8E8D /* InfoPlist.strings */; };
 		B33818F6183F422800CF8E8D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B33818F5183F422800CF8E8D /* main.m */; };
@@ -45,7 +44,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B33818EC183F422800CF8E8D /* CoreGraphics.framework in Frameworks */,
 				B33818EE183F422800CF8E8D /* UIKit.framework in Frameworks */,
 				B33818EA183F422800CF8E8D /* Foundation.framework in Frameworks */,
 			);
