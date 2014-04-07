@@ -64,7 +64,7 @@ typedef NS_ENUM(int, DMModernProgressViewAlign) {
 @property (nonatomic, strong) UIColor *replacedImageColor;
 
 // Current active color
-@property (nonatomic) UIColor *selectedColor;
+@property (nonatomic, strong) UIColor *selectedColor;
 
 // Get count visible blocks
 @property (readonly) long blockCount;

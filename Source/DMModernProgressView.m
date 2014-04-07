@@ -258,7 +258,10 @@
 - (void)initIndicatorView
 {
   if (nil == _indicatorView) {
-    _indicatorView = [[UIImageView alloc] initWithFrame:self.bounds];
+    CGRect frame = self.bounds;
+    frame.size.width = self.progressSize;
+
+    _indicatorView = [[UIImageView alloc] initWithFrame:frame];
     _indicatorView.clipsToBounds = YES;
     if (_aligment == DMModernProgressViewAlignRight) {
       _indicatorView.contentMode = UIViewContentModeRight;
@@ -518,7 +521,7 @@
   CGFloat size = _value * realItemSize;
   
   if (0 != (progressViewStyle & DMModernProgressViewStyleHalfElement)) {
-    CGFloat itCount = ceilf(size / itemSize);
+    CGFloat itCount = size / itemSize;
     if (itCount > 0) {
       size = itemSize * itCount;
     } else {
@@ -620,6 +623,7 @@
     }
     self.value = value;
   }
+  [super touchesMoved:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -636,6 +640,7 @@
     }
     self.value = value;
   }
+  [super touchesEnded:touches withEvent:event];
 }
 
 
