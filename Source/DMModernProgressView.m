@@ -29,7 +29,7 @@
 - (long)valueAtPosition:(CGFloat)position;
 - (void)indicatorViewUpdate;
 
-- (CGFloat)progressItemSize;
+- (CGFloat)progressItemSize:(BOOL)simple;
 - (CGFloat)progressSize;
 - (CGFloat)progressSize:(CGFloat)itemSize;
 - (CGRect)activeRect;
@@ -49,6 +49,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 @implementation DMModernProgressView
+{
+  CGFloat _itemSize;
+}
 
 @synthesize value = _value;
 @synthesize maxValue;
@@ -72,6 +75,7 @@
 {
   if (self = [super init]) {
     maxValue = 100;
+    _itemSize = 0.f;
   }
   return self;
 }
@@ -80,6 +84,7 @@
 {
   if (self = [super initWithFrame:frame]) {
     maxValue = 100;
+    _itemSize = 0.f;
   }
   return self;
 }
@@ -88,6 +93,7 @@
 {
   if (self = [super initWithCoder:coder]) {
     maxValue = 100;
+    _itemSize = 0.f;
   }
   return self;
 }
@@ -111,7 +117,7 @@
   [super drawRect:rect];
   
   // Calc progres size
-  CGFloat progressItemSize = [self progressItemSize];
+  CGFloat progressItemSize = [self progressItemSize:true];
   CGFloat progressSize = progressItemSize * (CGFloat)_value;
   
   // If we have image
@@ -155,7 +161,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#pragma mark GC Helpers
+#pragma mark – GC Helpers
 ////////////////////////////////////////////////////////////////////////////////
 
 - (void)indicatorViewUpdate
@@ -235,7 +241,7 @@
 
 - (UIImage *)generateForground:(CGRect)rect
 {
-  CGFloat progressItemSize = [self progressItemSize];
+  CGFloat progressItemSize = [self progressItemSize:NO];
 
   // Get items count
   const long itemsCount = self.blockCount;
@@ -252,7 +258,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#pragma mark Getters / Setters
+#pragma mark – Getters / Setters
 ////////////////////////////////////////////////////////////////////////////////
 
 - (void)initIndicatorView
@@ -346,18 +352,6 @@
   }
 }
 
-- (void)setProgressImageItem:(UIImage *)progressImageItem
-{
-  _progressImageItem = progressImageItem;
-  [self setNeedsDisplay];
-}
-
-- (void)setProgressSelectedImageItem:(UIImage *)progressSelectedImageItem
-{
-  _progressSelectedImageItem = progressSelectedImageItem;
-  [self setNeedsDisplay];
-}
-
 /**
  * Get: Current active color
  *
@@ -400,7 +394,7 @@
 - (long)blockCount
 {
   return progressBlocks > 0 ? progressBlocks
-          : (long)round(self.frame.size.width / self.progressItemSize);
+  : (long)round(self.frame.size.width / [self progressItemSize:NO]);
 }
 
 /**
@@ -415,7 +409,7 @@
   }
   
   const float progressSize = self.progressSize;
-  const CGFloat itemSize = self.progressItemSize;
+  const CGFloat itemSize = [self progressItemSize:NO];
   float val = progressSize / itemSize;
   
   if (0 != (progressViewStyle & DMModernProgressViewStyleHalfElement)) {
@@ -427,12 +421,12 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#pragma mark Helpers
+#pragma mark – Helpers
 ////////////////////////////////////////////////////////////////////////////////
 
 - (long)valueAtPosition:(CGFloat)position
 {
-  const CGFloat itemSize = self.progressItemSize;
+  const CGFloat itemSize = [self progressItemSize:NO];
   const long countBlocks  = progressBlocks > 0
                           ? progressBlocks
                           : (long)round(self.frame.size.width / itemSize);
@@ -460,35 +454,45 @@
   return value;
 }
 
+- (CGFloat)_updateItemSize:(BOOL)simple
+{
+  CGSize size = self.frame.size;
+  CGFloat chainSize = size.width / maxValue;
+  
+  if (!simple) {
+    if (progressBlocks > 0 && 0 != (progressViewStyle & DMModernProgressViewStyleStretching)) {
+      chainSize = size.width / progressBlocks;
+    } else if (_progressImageItem) {
+      CGSize imageSize = _progressImageItem.size;
+
+      // Calculate
+      if (imageSize.height <= size.height) {
+        chainSize = imageSize.width;
+      } else {
+        chainSize = imageSize.width * (size.height / imageSize.height);
+      }
+
+      // Correct size
+      if (size.width / chainSize < progressBlocks) {
+        chainSize = size.width / progressBlocks;
+      }
+    }
+  }
+  
+  return _itemSize = chainSize;
+}
+
 /**
  * Get item size
  *
  * @return item width
  */
-- (CGFloat)progressItemSize
+- (CGFloat)progressItemSize:(BOOL)simple
 {
-  CGSize size = self.frame.size;
-  CGFloat chainSize = size.width / maxValue;
-  
-  if (progressBlocks > 0 && 0 != (progressViewStyle & DMModernProgressViewStyleStretching)) {
-    chainSize = size.width / progressBlocks;
-  } else if (_progressImageItem) {
-    CGSize imageSize = _progressImageItem.size;
-    
-    // Calculate
-    if (imageSize.height <= size.height) {
-      chainSize = imageSize.width;
-    } else {
-      chainSize = imageSize.width * (size.height / imageSize.height);
-    }
-    
-    // Correct size
-    if (size.width / chainSize < progressBlocks) {
-      chainSize = size.width / progressBlocks;
-    }
+  if (_itemSize > 0) {
+    return _itemSize;
   }
-  
-  return chainSize;
+  return [self _updateItemSize:simple];
 }
 
 /**
@@ -498,7 +502,7 @@
  */
 - (CGFloat)progressSize
 {
-  return [self progressSize:self.progressItemSize];
+  return [self progressSize:[self progressItemSize:NO]];
 }
 
 /**
@@ -540,7 +544,7 @@
 
 - (CGRect)activeRect
 {
-  return [self activeRect:self.progressItemSize];
+  return [self activeRect:[self progressItemSize:NO]];
 }
 
 - (CGRect)activeRect:(CGFloat)itemSize
@@ -572,7 +576,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#pragma mark CG Helpers
+#pragma mark – CG Helpers
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -606,7 +610,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#pragma mark Touch events
+#pragma mark – Touch events
 ////////////////////////////////////////////////////////////////////////////////
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
